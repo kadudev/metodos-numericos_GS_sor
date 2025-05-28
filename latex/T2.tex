@@ -1,0 +1,197 @@
+
+\documentclass[12pt,a4paper,openany,oneside]{abntex2}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{etoolbox}
+\usepackage{amsmath}
+\usepackage{graphicx}
+%\usepackage[pdftex]{hyperref}
+
+\title{Implementação dos métodos numéricos Gauss-Seidel e SOR baseado em Gauss-Seidel}
+\author{Carlos Eduardo Amorim Gusmão}
+\date{2025}
+
+\instituicao{%
+Universidade Federal de Minas Gerais\\
+Bacharelado em Engenharia Mecânica}
+
+\tipotrabalho{Trabalho apresentado à disciplina de Métodos Numéricos aplicados a Engenharia Mecânica.}
+
+\orientador{Prof. Lucas Ribeiro Alves}
+
+\local{Belo Horizonte}
+\data{28 de maio de 2025}
+
+
+
+\begin{document}
+
+\imprimircapa
+\imprimirfolhaderosto
+
+% Início do conteúdo
+\begin{center}
+    \textbf{\large Introdução}
+\end{center}
+
+
+O objetivo deste trabalho foi implementar e analisar o 
+desempenho de dois métodos iterativos clássicos para a 
+resolução de sistemas lineares: o método de Gauss-Seidel 
+e o método de Relaxação Sucessiva (SOR - Successive Over-Relaxation). 
+Esses métodos foram aplicados a sistemas lineares cujas soluções 
+são conhecidas previamente, de modo a permitir a validação dos 
+resultados obtidos numericamente.
+A implementação foi realizada na linguagem C++, com comentários 
+explicativos ao longo do código para descrever cada etapa do 
+processo computacional. Utilizou-se um mesmo critério de parada 
+para ambos os métodos, baseado na precisão do erro relativo entre 
+iterações consecutivas, assegurando uma comparação justa entre os 
+algoritmos.
+
+Durante a execução, foram armazenados os valores dos erros a 
+cada iteração, o que possibilitou a análise da taxa de 
+convergência de cada método. Os resultados foram organizados 
+em gráficos que representam a evolução do erro em função do 
+número de iterações, permitindo uma avaliação visual da eficiência 
+de convergência. A comparação entre Gauss-Seidel e SOR evidencia 
+as vantagens e limitações de cada abordagem, especialmente no que 
+se refere à escolha do parâmetro de relaxação no método SOR.
+\\
+\begin{center}
+    \textbf{\large Desenvolvimento}
+\end{center}
+
+O código foi desenvolvido na linguagem C++ usando a programação modularizada, com uma função para cada etapa:
+
+$\bullet$ Função para Gauss-Seidel
+
+$\bullet$ Função para SOR-Gauss-Seidel
+
+$\bullet$ Função principal main
+
+O método de Gauss-Seidel tem como ideia principal isolar uma das variáveis
+e resolver normalmente a equação gerada pelo isolamento, usando a fórmula geral:
+
+\begin{equation*}
+x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(k+1)} - \sum_{j=i+1}^{n} a_{ij} x_j^{(k)} \right)
+\nonumber
+\end{equation*}
+
+Para que esse método convirja, é necessário que o sistema seja
+uma matriz diagonal dominante, ou seja, os valores em que i=j, devem ser maiores que o módulo da soma dos outros valores da mesma linha. Para tanto, foi escolhido o seguinte sistema:
+
+\begin{equation}
+\begin{cases}
+4x + -y = 15 \\
+-x + 4y -z = 10 \\
+-y+3z = 10
+\end{cases}
+\nonumber
+\end{equation}
+
+Em formato de matriz, é:
+\[
+\left[
+\begin{array}{ccc|c}
+4 & -1 & 0 & 15 \\
+-1 & 4 & -1 & 10 \\
+0 & -1 & 3 & 10
+\end{array}
+\right]
+\]
+
+Diferentemente do método de Jacobi, Gauss-Seidel usa os valores imediatos encontrados
+,em vez de usar valores pré definidos em toda iteração. Mas também possui chutes inciais. Aqui foram
+\begin{equation} 
+x=0; y=0; z=0 
+\nonumber
+\end{equation}
+
+SOR baseado em Gauss-Seidel consiste em aprimorar Gauss-Seidel, usando um $\lambda$, cujo valor pode, ou não,
+contribuir para que convirja mais rápido, assim chegando a solução real de forma muito mais rápido se bem ajustado.
+Aqui foram feitos diversos testes para que fosse escolhido um valor aceitável para $\lambda$, chegando ao valor de 1,05.
+Esse método também tem uma fórmula geral e consiste em:
+
+\begin{equation}
+    x_{\!i}^{\text{novo}} = \lambda x_{\!i}^{\text{novo}} + (1 - \lambda) x_{\!i}^{\text{velho}}
+\nonumber
+\end{equation}
+
+No código o cálculo da variação da solução entre iterações é realizado por meio da variável dx, que representa a norma 
+da diferença entre os vetores solução de duas iterações consecutivas. Essa variação é usada como critério de parada 
+do método: quando dx se torna menor que um valor previamente definido:
+\begin{equation} \varepsilon=10^-6
+    \nonumber
+\end{equation}
+
+Além disso, a cada iteração, é calculado o erro da solução atual em relação ao sistema original. Esse erro é obtido por:
+\begin{equation}
+    ||A\vec{x}-\vec{b}||
+    \nonumber
+\end{equation}
+Feito isso, a cada iteração realizada, são impressas as soluções, o dx e o erro.
+\\
+\begin{center}
+    \textbf{\large Análise dos dados gerados}
+\end{center}
+
+A partir dos erros, foi gerada a tabela, usada posteriormente para gerar o gráfico.
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+\hline
+Iteração & Erro (Gauss-Seidel) & Erro-SOR \\ \hline
+1   & 5,64618   & 5,05988   \\ \hline
+2   & 1,40683   & 1,12791   \\ \hline
+3   & 0,205163  & 0,0120131 \\ \hline
+4   & 0,0299195 & 0,000644079 \\ \hline
+5   & 0,00436327 & 0,000130519 \\ \hline
+6   & 0,00063631 & 2,73e-06 \\ \hline
+7   & 9,28e-05   & 1,58e-07 \\ \hline
+8   & 1,35e-05   &         \\ \hline
+9   & 1,97e-06 & \\ \hline
+10  & 2,88e-07 & \\ \hline
+\end{tabular}
+\end{center}
+
+Foi obtido o gráfico:
+
+\begin{figure}[!h]  % o !h tenta colocar a figura exatamente aqui
+    \centering       % centraliza a imagem
+    \includegraphics[width=13cm]{grafico} % insere a imagem redimensionada
+    \caption{Gráfico da evolução do erro}
+    \label{fig:minha_imagem}
+\end{figure}
+
+O gráfico apresenta a evolução do erro para os métodos Gauss-Seidel (representado pela linha vermelha com marcadores de losango) e SOR baseado em Gauss-Seidel (representado pela linha azul com marcadores de quadrado). O eixo horizontal mostra o "Número de iterações" e o eixo vertical representa o "Erro".
+Ambos os métodos começam com um erro inicial elevado. Isso é normal, pois as iterações iniciais são geralmente as que produzem as maiores reduções de erro. Nas primeiras 2 a 3 iterações, ambos os métodos mostram uma queda abrupta e significativa no erro. O erro diminui rapidamente após a primeira iteração e a partir da quarta iteração
+o método de SOR já possui um erro muito próximo de zero, enquando o Gauss-Seidel, está um pouco mais acima. Ao final, percebe-se que para o método de SOR foram necessárias menos iterações em comparação com o outro método.
+
+\begin{center}
+    \textbf{\large Conclusão}
+\end{center}
+
+O gráfico evidencia claramente a superioridade do método SOR sobre o método de Gauss-Seidel tradicional em termos de velocidade de convergência para o problema. Embora ambos os métodos sejam capazes de reduzir o erro e convergir para uma solução de alta precisão, o SOR atinge esse estado de convergência em um 
+número muito menor de iterações. Essa diferença no desempenho entre os métodos ressalta a eficácia do fator de relaxamento ($\lambda$) ao método SOR na otimização do processo iterativo de Gauss-Seidel. Ao "super-relaxar" ou "sub-relaxar" as estimativas das variáveis a cada passo, o SOR consegue corrigir o 
+erro de forma mais eficiente, evitando oscilações ou uma convergência muito lenta.
+
+Portanto, a conclusão é que, para problemas com características semelhantes ao exemplificado, 
+o método SOR representa uma escolha mais eficiente computacionalmente, pois permite alcançar 
+a solução desejada com menor esforço, resultando em menor tempo de processamento e recursos 
+computacionais. Essa é uma informação importante para a seleção de algoritmos em 
+aplicações de engenharia e ciência que envolvem a solução numérica de grandes sistemas lineares.
+
+\newpage
+\begin{center}
+    \textbf{\large Referências}
+\end{center}
+
+\setlength{\parindent}{0pt}
+CHAPRA, STEVEN C. \textbf{Métodos numéricos para engenharia}. Tradução: Helena Castro
+São Paulo, 2008. p.250-254, 27 mai. 2025.
+
+\end{document}
